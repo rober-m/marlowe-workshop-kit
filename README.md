@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-Welcome to Marlowe's workshop/hackathon. [Marlowe] is an ecosystem of tools and languages to enable the development of financial and transactional smart contracts. Formal proofs, extensive testing, and analysis tools provide strong assurances for the safety of Marlowe smart contracts.
+Welcome to Marlowe's workshop/hackathon. [Marlowe]() is an ecosystem of tools and languages to enable the development of financial and transactional smart contracts. Formal proofs, extensive testing, and analysis tools provide strong assurances for the safety of Marlowe smart contracts.
 
 A Marlowe smart contract is built by combining a small number of building blocks that describe making a payment, making an observation of something in the "real world," waiting until a certain condition becomes true, and other similar types of concepts.
 
