@@ -3,7 +3,9 @@
 
 This folder contains bash scripts for creating arbitrary number of cardano wallets and fund them with test ADA. The sections below guide you through the workflow and explain how to use the scripts. 
 
-**All scripts require the `cardano-node` and `cardano-cli` installed. The `cardano-node` also has to be running and synced.** Instructions for installing and running the `cardano-node` and other cardano tools can be found at the bottom of this page. 
+**All scripts require the `cardano-node` and `cardano-cli` installed execpt the *generate_seeds_and_addresses_1.sh* script. The `cardano-node` also has to be running and synced.** 
+
+Instructions for installing and running the `cardano-node` and other cardano tools can be found at the bottom of this page. 
 
 Before running the scripts you have to give them executable permission: 
 ```console
@@ -23,16 +25,21 @@ The script takes in the name of the testnet which can be either *preview* or *pr
 Generating seeds and cardano addresses
 --------------------------------------
 
-The *generate_seeds_and_addresses.sh* script generates a user requested number of wallet seeds and addresses beloning to the wallets and stores them in the *seeds.txt* and *addresses.txt* files. 
+The *generate_seeds_and_addresses_1.sh* script generates a user requested number of wallet seeds and addresses beloning to the wallets and stores them in the *seeds.txt* and *addresses.txt* files. The *generate_seeds_and_addresses_2.sh* script does the same. The difference between them is following: 
+* Script 1 uses the `cardano-address` tool which does not require a running `cardano-node`. In addition to the *seeds.txt* and *addresses.txt* files it creates the *wallet_files* folder where it stores the seeds and addresses for each wallet in an individual file. The tool can be installed on Windows and Linux. 
+* Script 2 uses the `cardano-wallet` tool which does require a running and synced `cardano-node`. With this script you can also set a passphrase for each of the wallets. The tool can be installed on Windows, Mac OS and Linux. 
 
-The script takes in the number of wallets we want to generate and the passphrase which will be set the same for all wallets. The passphrase has to be at least 10 characters long. Example command:
+Both scripts take in the number of wallets we want to generate and the second script also takes in the passphrase which will be set the same for all wallets. The passphrase has to be at least 10 characters long. Example command:
 ```console
-./generate_seeds_and_addresses.sh 50 passphrase12
+./generate_seeds_and_addresses_1.sh 50 
+./generate_seeds_and_addresses_2.sh 50 passphrase12 
 ```
 
-The *generate_seeds_and_addresses.sh* script also requires the `cardano-wallet` tool installed and the wallet server running and synced. The executable files can be found at the [cardano-wallet GitHub page](https://github.com/cardano-foundation/cardano-wallet). After downloading add the `cardano-wallet` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
+To install the `cardano-address` tool download the zipped file under the Assets section from the [cardano-address GitHub page](https://github.com/IntersectMBO/cardano-addresses/releases). Unzip the file and add the `cardano-address` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
 
-To startup the server execute the following command:
+To install the `cardano-wallet` tool download the zipped file under the Assets section from the [cardano-address GitHub page](https://github.com/IntersectMBO/cardano-addresses/releases). Unzip the file and add the `cardano-wallet` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
+
+The *generate_seeds_and_addresses_2.sh* script requires `cardano-wallet` server running and synced. To startup the server execute the following command:
 ```console
 cardano-wallet serve \
 --port 1337 \
@@ -57,15 +64,15 @@ The *slow_send_funds_to_addresses.sh* script sends a user defined amount of ADA 
 python send_funds_to_addresses.py 
 ```
 
-Both shell scripts take in the testnet name and ada amount per wallet. Example command:
+Both scripts take in the testnet name and ADA amount per wallet. Example command: 
 ```console
 ./send_funds_to_addresses.sh preview 10
 ./slow_send_funds_to_addresses.sh preview 10
 ```
 
-Both scripts also assume the master address from which the ADA gets send is stored in the *master.addr* file and the singing key for the master address in *master.skey* file. These files get generated if you execute the *create_and_fund_master_address.sh* script. 
+Both scripts also assume the master address from which the ADA gets send is stored in the *master.addr* file and the singing key for the master address is stored in the *master.skey* file. These files get generated if you execute the *create_and_fund_master_address.sh* script. 
 
-Also in both scripts it is checked that the number of wallets taken from the *addresses.txt* multiplied with the ADA per one wallet does not exceed 10.000 ADA, which is the default value you can request from the Cardano Faucet. If you have an address containing more then 10.000 ADA you can change that number by hand in both shell scripts where security checks are made in the begining.  
+Also in both scripts it is checked that the number of wallets taken from the *addresses.txt* multiplied with the ADA per one wallet does not exceed 10.000 ADA, which is the default value you can request from the Cardano Faucet. If you have an address containing more then 10.000 ADA you can change that number by hand in both scripts where security checks are made in the begining.  
 
 Installing the `cardano-node` and other command line tools
 ----------------------------------------------------------
