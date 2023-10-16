@@ -20,7 +20,8 @@ master_skey="master.skey"
 master_address=$(cat master.addr)
 
 addresses_file_line_count=$(wc -l addresses.txt)
-number_of_wallets=${addresses_file_line_count::1}
+stringarray=($addresses_file_line_count)
+number_of_wallets=${stringarray[0]}
 """
 
 security_checks = \
@@ -120,6 +121,8 @@ do
     >> transaction.log 2>&1
 
     master_address_utxo=$(cat master_address_funds.txt | jq -r 'keys[0]')
+    master_address_utxo_array=(${master_address_utxo//#/ })
+    master_address_hash=${master_address_utxo_array[0]}
 
     echo "Querying funds for last user address." >> transaction.log 
     cardano-cli query utxo  \\
@@ -130,11 +133,10 @@ do
 
     last_user_address_funds=$(cat user_address_funds.txt)
 
-    echo "Master address utxo: $master_address_utxo" >> transaction.log 
-    echo "Master address transaction hash: ${master_address_utxo::-2}" >> transaction.log 
+    echo "Master address transaction hash: $master_address_hash" >> transaction.log 
     echo "User address funds: $last_user_address_funds" >> transaction.log 
 
-    if [[ "$last_user_address_funds" == *"${master_address_utxo::-2}"* ]]; then
+    if [[ "$last_user_address_funds" == *"$master_address_hash"* ]]; then
         echo "Last user address received funds."
         user_addr_funds_updated=true
         break
