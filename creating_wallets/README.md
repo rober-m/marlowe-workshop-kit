@@ -64,15 +64,27 @@ The *slow_send_funds_to_addresses.sh* script sends a user defined amount of ADA 
 python send_funds_to_addresses.py 
 ```
 
-Both scripts take in the testnet name and ADA amount per wallet. Example command: 
+Both scripts assume the master address from which the ADA gets send is stored in the *master.addr* file and the singing key for the master address is stored in the *master.skey* file. These files get generated if you execute the *create_and_fund_master_address.sh* script. 
+
+Both scripts send funds from the first UTXO listed under this address. If your master address contains multiple UTXOs you can bundle them into one with the script *bundle_master_addr_utxos.sh*. You can read a description of that script and how to use it in the next section. 
+
+Also in both scripts it is checked that the number of wallets taken from the *addresses.txt* multiplied with the ADA per one wallet does not exceed 10.000 ADA, which is the default value you can request from the Cardano Faucet. If you have an address containing more then 10.000 ADA you can change that number by hand in both scripts where security checks are made in the begining.  
+
+Both scripts take in the testnet name which can be either *preview* or *preprod* and ADA amount per wallet. Example command: 
 ```console
 ./send_funds_to_addresses.sh preview 10
 ./slow_send_funds_to_addresses.sh preview 10
 ```
 
-Both scripts also assume the master address from which the ADA gets send is stored in the *master.addr* file and the singing key for the master address is stored in the *master.skey* file. These files get generated if you execute the *create_and_fund_master_address.sh* script. 
+Bundle UTXOs at address into one
+--------------------------------
 
-Also in both scripts it is checked that the number of wallets taken from the *addresses.txt* multiplied with the ADA per one wallet does not exceed 10.000 ADA, which is the default value you can request from the Cardano Faucet. If you have an address containing more then 10.000 ADA you can change that number by hand in both scripts where security checks are made in the begining.  
+The *bundle_master_addr_utxos.sh* script uses the address stored in *master.addr* file and the signing key stored in *master.skey* to create a transaction that sends all funds from this address back to this address by creating a single UTXO. 
+
+The script takes in the name of the testnet which can be either *preview* or *preprod*. Example command: 
+```console
+./bundle_master_addr_utxos.sh preview
+```
 
 Installing the `cardano-node` and other command line tools
 ----------------------------------------------------------
