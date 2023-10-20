@@ -37,7 +37,7 @@ Both scripts take in the number of wallets we want to generate and the second sc
 
 To install the `cardano-address` tool download the zipped file under the Assets section from the [cardano-address GitHub page](https://github.com/IntersectMBO/cardano-addresses/releases). Unzip the file and add the `cardano-address` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
 
-To install the `cardano-wallet` tool download the zipped file under the Assets section from the [cardano-address GitHub page](https://github.com/IntersectMBO/cardano-addresses/releases). Unzip the file and add the `cardano-wallet` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
+To install the `cardano-wallet` tool download the zipped file under the Assets section from the [cardano-wallet GitHub page](https://github.com/cardano-foundation/cardano-wallet#obtaining-cardano-wallet). Unzip the file and add the `cardano-wallet` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
 
 The *generate_seeds_and_addresses_2.sh* script requires `cardano-wallet` server running and synced. To startup the server execute the following command:
 ```console
