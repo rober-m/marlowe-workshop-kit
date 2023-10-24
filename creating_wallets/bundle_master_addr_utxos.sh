@@ -67,8 +67,6 @@ cardano-cli transaction submit  \
     --testnet-magic $testnet_number  \
     --tx-file tx.signed 
 
-echo "Submitted transaction." 
-
 # Checking if UTXOs at master address were updated  
 master_addr_funds_updated=false
 for i in $(seq 1 15); 
