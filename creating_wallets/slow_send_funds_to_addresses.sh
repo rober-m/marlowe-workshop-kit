@@ -10,15 +10,10 @@ testnet=$1
 ada_amount_per_wallet=$2 
 
 addresses_file_line_count=$(wc -l addresses.txt)
-number_of_wallets=${addresses_file_line_count::1}
+stringarray=($addresses_file_line_count)
+number_of_wallets=${stringarray[0]}
 
 master_skey="master.skey"
-
-# Some security checks 
-if [ 10000 -lt $(($number_of_wallets*$ada_amount_per_wallet)) ]; then
-    echo "Amount of total ADA to send exceeds 10.000 ADA." 
-    exit 1
-fi
 
 # Setting the testnet number 
 if [ $testnet = "preprod" ]; then
@@ -40,7 +35,16 @@ cardano-cli query utxo  \
     --out-file master_address_funds.txt \
 >> transaction.log 2>&1
 
-master_address_utxo=$(cat master_address_funds.txt | jq -r 'keys[0]')
+master_address_utxo=$(cat master_address_funds.txt | jq "keys[0]")
+master_address_lovelace=$(cat master_address_funds.txt | jq ".$master_address_utxo.value.lovelace")
+master_address_ada=$((master_address_lovelace/1000000))
+
+# Checking if there are enough funds present at the first UTXO of the master address 
+if [ $((master_address_ada-2)) -lt $(($number_of_wallets*$ada_amount_per_wallet)) ]; then
+    echo "Total amount of $(($number_of_wallets*$ada_amount_per_wallet)) ADA to send" 
+    echo "exceeds the amount of $master_address_ada ADA available minus 2 ADA for fees."  
+    exit 1
+fi
 
 # Sends funds to addresses. One transaction per one address. 
 echo "Sending $ada_amount_per_wallet ADA to each of the $number_of_wallets addresses." 
@@ -94,12 +98,11 @@ while IFS= read -r user_address; do
     fi
 done < addresses.txt 
 
-echo "Script successfully finished." 
-
+<<'END'
 # The loop above could be compressed into the code below which does not work because bash has
 # an issue to handle the " or ' character when passing it to the cardanoč-cli. This is needed in 
 # the --tx-out part. If executing the commend that gets printed to the terminal by hand it works.  
-<<'END'
+
 transaction_build_part1='cardano-cli transaction build 
                             --babbage-era 
                             --testnet-magic '$testnet_number' 
@@ -125,3 +128,5 @@ $transaction_build
 # or 
 # bash -c "$transaction_build"
 END
+
+echo "Script successfully finished." 

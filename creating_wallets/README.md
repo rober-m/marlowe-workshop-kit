@@ -27,7 +27,9 @@ Generating seeds and cardano addresses
 
 The *generate_seeds_and_addresses_1.sh* script generates a user requested number of wallet seeds and addresses beloning to the wallets and stores them in the *seeds.txt* and *addresses.txt* files. The *generate_seeds_and_addresses_2.sh* script does the same. The difference between them is following: 
 * Script 1 uses the `cardano-address` tool which does not require a running `cardano-node`. In addition to the *seeds.txt* and *addresses.txt* files it creates the *wallet_files* folder where it stores the seeds and addresses for each wallet in an individual file. The tool can be installed on Windows and Linux. 
-* Script 2 uses the `cardano-wallet` tool which does require a running and synced `cardano-node`. With this script you can also set a passphrase for each of the wallets. The tool can be installed on Windows, Mac OS and Linux. 
+* Script 2 uses the `cardano-wallet` tool which does require a running and synced `cardano-node`. With this script you have to set a passphrase (wallet password) that will be used for every wallet. The tool can be installed on Windows, Mac OS and Linux. 
+
+In case you also want to set a passphrase (wallet password) with the first script look at the [cardano-addresses GitHub repository documentation](https://github.com/IntersectMBO/cardano-addresses#documentation) under *How to generate a root private key with passphrase (root.xsk)*.
 
 Both scripts take in the number of wallets we want to generate and the second script also takes in the passphrase which will be set the same for all wallets. The passphrase has to be at least 10 characters long. Example command:
 ```console
@@ -35,7 +37,7 @@ Both scripts take in the number of wallets we want to generate and the second sc
 ./generate_seeds_and_addresses_2.sh 50 passphrase12 
 ```
 
-To install the `cardano-address` tool download the zipped file under the Assets section from the [cardano-address GitHub page](https://github.com/IntersectMBO/cardano-addresses/releases). Unzip the file and add the `cardano-address` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
+To install the `cardano-address` tool download the zipped file under the Assets section from the [cardano-addresses GitHub page](https://github.com/IntersectMBO/cardano-addresses/releases). Unzip the file and add the `cardano-address` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
 
 To install the `cardano-wallet` tool download the zipped file under the Assets section from the [cardano-wallet GitHub page](https://github.com/cardano-foundation/cardano-wallet#obtaining-cardano-wallet). Unzip the file and add the `cardano-wallet` executable file to your system path, e.g. copy them to `/usr/local/bin/`. 
 
@@ -68,7 +70,7 @@ Both scripts assume the master address from which the ADA gets send is stored in
 
 Both scripts send funds from the first UTXO listed under this address. If your master address contains multiple UTXOs you can bundle them into one with the script *bundle_master_addr_utxos.sh*. You can read a description of that script and how to use it in the next section. 
 
-Also in both scripts it is checked that the number of wallets taken from the *addresses.txt* multiplied with the ADA per one wallet does not exceed 10.000 ADA, which is the default value you can request from the Cardano Faucet. If you have an address containing more then 10.000 ADA you can change that number by hand in both scripts where security checks are made in the begining.  
+Also in both scripts it is checked that the number of wallets taken from the *addresses.txt* multiplied with the ADA per one wallet does not exceed the amount of ADA sitting at the first UTXO of the master address minus 2 ADA that are substracted because of transaction fees.  
 
 Both scripts take in the testnet name which can be either *preview* or *preprod* and ADA amount per wallet. Example command: 
 ```console

@@ -24,14 +24,8 @@ stringarray=($addresses_file_line_count)
 number_of_wallets=${stringarray[0]}
 """
 
-security_checks = \
+setting_testnet = \
 """
-# Some security checks 
-if [ 10000 -lt $(($number_of_wallets*$ada_amount_per_wallet)) ]; then
-    echo "Amount of total ADA to send exceeds 10.000 ADA." 
-    exit 1
-fi
-
 # Setting the testnet number 
 if [ $testnet = "preprod" ]; then
     testnet_number=1
@@ -43,9 +37,9 @@ else
 fi
 """
 
-master_addr_utxo = \
+security_checks = \
 """
-# Computing the master address UTXO 
+# Computing the master address UTXO and funds 
 msg="Querying funds for master address." 
 echo $msg && echo $msg >> transaction.log 
 cardano-cli query utxo  \\
@@ -54,7 +48,16 @@ cardano-cli query utxo  \\
     --out-file master_address_funds.txt \\
 >> transaction.log 2>&1
 
-master_address_utxo=$(cat master_address_funds.txt | jq -r 'keys[0]')
+master_address_utxo=$(cat master_address_funds.txt | jq "keys[0]")
+master_address_lovelace=$(cat master_address_funds.txt | jq ".$master_address_utxo.value.lovelace")
+master_address_ada=$((master_address_lovelace/1000000))
+
+# Checking if there are enough funds present at the first UTXO of the master address 
+if [ $((master_address_ada-2)) -lt $(($number_of_wallets*$ada_amount_per_wallet)) ]; then
+    echo "Total amount of $(($number_of_wallets*$ada_amount_per_wallet)) ADA to send" 
+    echo "exceeds the amount of $master_address_ada ADA available minus 2 ADA for fees."  
+    exit 1
+fi
 """
 
 # Transaction build command
@@ -150,7 +153,7 @@ fi
 """
 
 # Writing the entire bash script to a file 
-entire_script = parameters + security_checks + master_addr_utxo + \
+entire_script = parameters + setting_testnet + security_checks + \
                 build_part1 + build_part2 + build_part3 + \
                 sing_and_submit + check_funds 
 
