@@ -6,8 +6,9 @@
 set -e
 
 # Input parameters 
-testnet=$1
-ada_amount_per_wallet=$2 
+cardano_era=$1
+testnet=$2
+ada_amount_per_wallet=$3 
 
 addresses_file_line_count=$(wc -l addresses.txt)
 stringarray=($addresses_file_line_count)
@@ -29,14 +30,15 @@ fi
 master_address=$(cat master.addr | tr -d '\n')
 
 # Computing the master address UTXO 
-cardano-cli query utxo  \
+cardano-cli $cardano_era query utxo  \
     --address $master_address \
     --testnet-magic $testnet_number \
     --out-file master_address_funds.txt \
 >> transaction.log 2>&1
 
-master_address_utxo=$(cat master_address_funds.txt | jq "keys[0]")
-master_address_lovelace=$(cat master_address_funds.txt | jq ".$master_address_utxo.value.lovelace")
+master_address_utxo_raw=$(cat master_address_funds.txt | jq "keys[0]")
+master_address_utxo=$(cat master_address_funds.txt | jq "keys[0]" | tr -d '"')
+master_address_lovelace=$(cat master_address_funds.txt | jq ".$master_address_utxo_raw.value.lovelace")
 master_address_ada=$((master_address_lovelace/1000000))
 
 # Checking if there are enough funds present at the first UTXO of the master address 
@@ -52,8 +54,7 @@ while IFS= read -r user_address; do
     msg="Sending funds to address $user_address."
     echo $msg && echo $msg >> transaction.log
 
-    cardano-cli transaction build  \
-        --babbage-era  \
+    cardano-cli $cardano_era transaction build  \
         --testnet-magic $testnet_number  \
         --tx-in $master_address_utxo  \
         --tx-out "$user_address + $((1000000*$ada_amount_per_wallet)) lovelace"  \
@@ -61,23 +62,23 @@ while IFS= read -r user_address; do
         --out-file tx.body  \
     >> transaction.log 2>&1
 
-    cardano-cli transaction sign  \
+    cardano-cli $cardano_era transaction sign  \
         --tx-body-file tx.body  \
         --signing-key-file $master_skey  \
         --testnet-magic $testnet_number  \
         --out-file tx.signed  \
     >> transaction.log 2>&1 
 
-    cardano-cli transaction submit  \
+    cardano-cli $cardano_era transaction submit  \
         --testnet-magic $testnet_number  \
         --tx-file tx.signed  \
     >> transaction.log 2>&1
 
     master_addr_funds_updated=false
-    for i in $(seq 1 15); 
+    for i in $(seq 1 60); 
     do
-        sleep 4
-        cardano-cli query utxo  \
+        sleep 3
+        cardano-cli $cardano_era query utxo  \
             --address $master_address \
             --testnet-magic $testnet_number \
             --out-file master_address_funds.txt \
@@ -98,13 +99,14 @@ while IFS= read -r user_address; do
     fi
 done < addresses.txt 
 
-<<'END'
+echo "Script successfully finished." 
+
 # The loop above could be compressed into the code below which does not work because bash has
 # an issue to handle the " or ' character when passing it to the cardanoč-cli. This is needed in 
 # the --tx-out part. If executing the commend that gets printed to the terminal by hand it works.  
 
-transaction_build_part1='cardano-cli transaction build 
-                            --babbage-era 
+<<'END'
+transaction_build_part1='cardano-cli '$cardano_era' transaction build 
                             --testnet-magic '$testnet_number' 
                             --tx-in '$master_address_utxo' '
 
@@ -118,15 +120,15 @@ while IFS= read -r user_address; do
     transaction_build_part2="$transaction_build_part2$tx_out_part"
 done < addresses.txt 
 
-transaction_build="$transaction_build_part1$transaction_build_part2$transaction_build_part3"
+transaction_build=($transaction_build_part1$transaction_build_part2$transaction_build_part3)
 
 echo "Command for sending ADA to all addresses in addresses.txt."
-echo $transaction_build 
+echo ${transaction_build[@]}  
 
 # Executing the command. Does not work. 
-$transaction_build
+"${transaction_build[@]}"  
 # or 
-# bash -c "$transaction_build"
-END
+#bash -c "${transaction_build[@]}" 
 
-echo "Script successfully finished." 
+# Plus the code for signing, submiting and checking if funds have arrived. 
+END

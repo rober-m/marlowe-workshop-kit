@@ -45,9 +45,9 @@ elif [ $testnet_number -eq 2 ]; then
     curl -X POST -s 'https://faucet.preview.world.dev.cardano.org/send-money/'$master_address'?api_key=nohnuXahthoghaeNoht9Aow3ze4quohc' > /dev/null
 fi 
 
-# Check if funds arrive at master address within a minute 
+# Check if funds arrive at master address within 3 minutes 
 funds_arrived=false
-for i in $(seq 1 20); do 
+for i in $(seq 1 60); do 
     master_addr_funds=$(cardano-cli query utxo \
                           --address $master_address \
                           --testnet-magic $testnet_number)
